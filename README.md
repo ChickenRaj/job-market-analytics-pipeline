@@ -20,3 +20,8 @@ This tool automates the ingestion of unstructured job description texts, filters
 - **The Challenge:** During initial testing, the data aggregation layer executed flawlessly but yielded empty tables and zero market insights.
 - **The Root Cause:** The script suffered from an execution order bug where data reading and text processing functions were triggered before the database ingestion engine could populate the tables.
 - **The Solution:** I refactored the execution engine to enforce strict chronological orchestration. By sequencing the pipeline into isolated phases (Setup ➡️ Ingest ➡️ Store ➡️ Process), I eliminated data races and ensured clean state management.
+
+### Gracefully Handling Semi-Structured Data Null Values
+- **The Challenge:** When processing 100 live job records, the pipeline encountered an unhandled `AttributeError: 'NoneType' object has no attribute 'text'` crash mid-loop.
+- **The Root Cause:** Web data is inherently inconsistent. A specific job posting lacked a description container element (`<p class="content">`), causing the HTML parser to return `None` and crash the program during text extraction.
+- **The Solution:** I introduced structural defensive coding practices using inline conditional checks. By evaluating if the DOM elements existed before triggering extraction actions, the system safely assigned fallback data strings without crashing the execution process.
